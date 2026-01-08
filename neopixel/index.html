@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoPixel Evolution - Casino Completo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js" defer></script>
+</head>
+<body>
+    <!-- Fondo de estrellas -->
+    <div class="background-stars" id="backgroundStars"></div>
+
+    <!-- Audio elements -->
+    <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+    <audio id="loseSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-over-sound-1996.mp3" preload="auto"></audio>
+    <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
+    <audio id="coinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-1998.mp3" preload="auto"></audio>
+
+    <!-- Login/Register Modal -->
+    <div class="auth-overlay" id="authOverlay"></div>
+    <div class="auth-modal" id="authModal">
+        <!-- ... mismo contenido del modal de login ... -->
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-overlay" id="adminOverlay"></div>
+    <div class="admin-panel" id="adminPanel">
+        <!-- ... mismo contenido del panel de administración ... -->
+    </div>
+
+    <!-- Chest Opening Animation -->
+    <div id="chestAnimation" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: none; justify-content: center; align-items: center;">
+        <!-- ... mismo contenido ... -->
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Sound Toggle -->
+    <div class="sound-toggle" id="soundToggle">
+        <i class="fas fa-volume-up"></i>
+    </div>
+
+    <header class="cyber-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo" id="logo">
+                        <div class="logo-icon"><i class="fas fa-gamepad"></i></div>
+                        <div class="logo-text">NEO PIXEL EVOLUTION</div>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i> Modo
+                    </button>
+                </div>
+                
+                <div class="user-panel">
+                    <div class="balance-container">
+                        <div class="balance-label">SALDO</div>
+                        <div class="balance-amount" id="balance">0</div>
+                        <div class="currency">PIX</div>
+                    </div>
+                    <button class="profile-btn" id="profileButton">
+                        <i class="fas fa-user"></i> Perfil
+                    </button>
+                    <div class="user-avatar" id="userAvatar">
+                        <i class="fas fa-user"></i>
+                        <div class="logout-btn" id="logoutBtn" title="Cerrar sesión">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-layout">
+            <!-- Sidebar izquierda - Menú y Cookie Clicker mini -->
+            <aside class="sidebar-left" id="leftSidebar">
+                <!-- Menú colapsable -->
+                <nav class="collapsible-menu" id="gameMenu">
+                    <div class="menu-toggle" id="menuToggle">
+                        <span><i class="fas fa-bars"></i> MENÚ DE JUEGOS</span>
+                        <span id="menuIcon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="menu-content" id="menuContent">
+                        <a href="#" class="nav-tab active" data-page="rewards">
+                            <i class="fas fa-gift"></i> Recompensas
+                        </a>
+                        <a href="#" class="nav-tab" data-page="shop">
+                            <i class="fas fa-shopping-cart"></i> Tienda
+                        </a>
+                        <a href="#" class="nav-tab" data-page="clicker">
+                            <i class="fas fa-cookie-bite"></i> Cookie Clicker
+                        </a>
+                        <a href="#" class="nav-tab" data-page="rocket">
+                            <i class="fas fa-rocket"></i> Cohete
+                        </a>
+                        <a href="#" class="nav-tab" data-page="dice">
+                            <i class="fas fa-dice-d6"></i> Dados
+                        </a>
+                        <a href="#" class="nav-tab" data-page="slots">
+                            <i class="fas fa-coins"></i> Tragamonedas
+                        </a>
+                        <a href="#" class="nav-tab" data-page="roulette">
+                            <i class="fas fa-dice"></i> Ruleta
+                        </a>
+                        <a href="#" class="nav-tab" data-page="memory">
+                            <i class="fas fa-brain"></i> Memorama
+                        </a>
+                        <a href="#" class="nav-tab" data-page="agar">
+                            <i class="fas fa-blender"></i> Agar.io
+                        </a>
+                        <a href="#" class="nav-tab" data-page="extraction">
+                            <i class="fas fa-crosshairs"></i> Extraction
+                        </a>
+                        <a href="#" class="nav-tab" data-page="trading">
+                            <i class="fas fa-exchange-alt"></i> Intercambio
+                        </a>
+                    </div>
+                </nav>
+
+                <!-- Cookie Clicker mini colapsable -->
+                <div class="collapsible-menu" id="cookieMenu">
+                    <div class="menu-toggle" id="cookieToggle">
+                        <span><i class="fas fa-cookie-bite"></i> MINI COOKIE</span>
+                        <span id="cookieIcon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="menu-content" id="cookieContent">
+                        <div class="mini-cookie-section">
+                            <div class="mini-cookie" id="miniCookie">
+                                🍪
+                            </div>
+                            <div class="cookie-stats">
+                                <div class="cookie-stat">
+                                    <span>PIX por clic:</span>
+                                    <span class="stat-value" id="miniClickValue">1</span>
+                                </div>
+                                <div class="cookie-stat">
+                                    <span>PIX por segundo:</span>
+                                    <span class="stat-value" id="miniAutoValue">0</span>
+                                </div>
+                                <div class="cookie-stat">
+                                    <span>Clics totales:</span>
+                                    <span class="stat-value" id="miniTotalClicks">0</span>
+                                </div>
+                            </div>
+                            <button class="cyber-button green" id="upgradeMini" style="width: 100%; margin-top: 10px;">
+                                Mejorar Auto-Clic (1000 PIX)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Área de juego principal -->
+            <main class="game-area" id="main-content">
+                <!-- Aquí se cargará el contenido de las páginas -->
+                <div id="page-content"></div>
+            </main>
+
+            <!-- Sidebar derecha -->
+            <aside class="sidebar-right" id="rightSidebar">
+                <div class="sidebar-panel">
+                    <h3 class="panel-title"><i class="fas fa-trophy"></i> Leaderboard</h3>
+                    <div id="leaderboard" style="max-height: 300px; overflow-y: auto;">
+                        <!-- Leaderboard se cargará aquí -->
+                    </div>
+                    <button class="cyber-button" id="refreshLeaderboard" style="width: 100%; margin-top: 10px;">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+
+                <div class="sidebar-panel">
+                    <h3 class="panel-title"><i class="fas fa-users"></i> Jugadores en Línea</h3>
+                    <div id="onlinePlayers" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Online players se cargarán aquí -->
+                    </div>
+                </div>
+
+                <div class="sidebar-panel">
+                    <h3 class="panel-title"><i class="fas fa-bolt"></i> Eventos Activos</h3>
+                    <div id="activeEvents">
+                        <div style="background: rgba(255, 215, 0, 0.1); border-radius: 10px; padding: 15px; text-align: center; border: 1px solid gold;">
+                            <div style="font-size: 1.2rem; color: gold; margin-bottom: 5px;">TORNEO SEMANAL</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Premio: 10,000 PIX</div>
+                            <div style="font-size: 0.8rem; opacity: 0.7;" id="tournamentTime">Termina en: 2 días</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <footer style="text-align: center; padding: 20px; border-top: 1px solid var(--border-color); margin-top: 30px;">
+            <p>NeoPixel Evolution - Plataforma de juegos con moneda ficticia PIX. Solo para entretenimiento.</p>
+            <p>Debes tener suficientes PIX para acceder a los juegos premium. ¡Diviértete responsablemente!</p>
+        </footer>
+    </div>
+
+    <script>
+        // Código para cargar páginas dinámicamente
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar la página de recompensas por defecto
+            loadPage('rewards');
+
+            // Manejar clics en el menú
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    loadPage(page);
+                });
+            });
+
+            // Cargar página de perfil cuando se hace clic en el botón de perfil
+            document.getElementById('profileButton').addEventListener('click', function() {
+                loadPage('profile');
+            });
+        });
+
+        function loadPage(page) {
+            // Actualizar menú activo
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-page') === page) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Cargar el contenido de la página
+            fetch(page + '.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('page-content').innerHTML = html;
+                    // Inicializar los scripts específicos de la página
+                    initPage(page);
+                })
+                .catch(error => {
+                    console.error('Error cargando la página:', error);
+                    document.getElementById('page-content').innerHTML = '<h2>Error al cargar la página</h2>';
+                });
+        }
+
+        function initPage(page) {
+            // Inicializar componentes específicos de cada página
+            switch(page) {
+                case 'profile':
+                    initProfile();
+                    break;
+                case 'rewards':
+                    initRewards();
+                    break;
+                case 'shop':
+                    initShop();
+                    break;
+                case 'clicker':
+                    initClicker();
+                    break;
+                case 'rocket':
+                    initRocket();
+                    break;
+                case 'dice':
+                    initDice();
+                    break;
+                case 'slots':
+                    initSlots();
+                    break;
+                // ... otros casos
+            }
+        }
+    </script>
+</body>
+</html>
