@@ -1,0 +1,80 @@
+<h2 class="game-title"><i class="fas fa-coins"></i> Tragamonedas</h2>
+<div style="text-align: center; padding: 40px;">
+    <div style="display: flex; justify-content: center; gap: 20px; margin: 30px 0;">
+        <div id="slot1" style="width: 100px; height: 100px; background: white; border: 3px solid gold; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🍒</div>
+        <div id="slot2" style="width: 100px; height: 100px; background: white; border: 3px solid gold; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">🍋</div>
+        <div id="slot3" style="width: 100px; height: 100px; background: white; border: 3px solid gold; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">⭐</div>
+    </div>
+    <div style="margin: 20px 0;">
+        <div style="font-size: 0.9rem; opacity: 0.8;">APUESTA</div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px;">
+            <button class="cyber-button" id="slotDecrease">-10</button>
+            <div style="font-size: 2rem; font-weight: 700; color: var(--secondary-color); min-width: 100px;" id="slotBet">100</div>
+            <button class="cyber-button" id="slotIncrease">+10</button>
+        </div>
+    </div>
+    <button class="cyber-button green" id="slotSpin" style="padding: 15px 50px; font-size: 1.2rem;">Girar</button>
+    <div id="slotResult" style="margin-top: 20px;"></div>
+</div>
+
+<script>
+    // Tragamonedas
+    let slotBet = 100;
+    const betDisplay = document.getElementById('slotBet');
+    const slot1 = document.getElementById('slot1');
+    const slot2 = document.getElementById('slot2');
+    const slot3 = document.getElementById('slot3');
+    
+    const symbols = ['🍒', '🍋', '⭐', '🔔', '7️⃣'];
+    
+    function updateBet(amount) {
+        slotBet += amount;
+        if (slotBet < 10) slotBet = 10;
+        if (slotBet > 1000) slotBet = 1000;
+        betDisplay.textContent = slotBet;
+    }
+    
+    document.getElementById('slotIncrease').addEventListener('click', () => updateBet(10));
+    document.getElementById('slotDecrease').addEventListener('click', () => updateBet(-10));
+    
+    document.getElementById('slotSpin').addEventListener('click', function() {
+        window.parent.postMessage({ type: 'deductBalance', amount: slotBet }, '*');
+        
+        // Animación
+        slot1.style.transform = 'scale(1.1)';
+        slot2.style.transform = 'scale(1.1)';
+        slot3.style.transform = 'scale(1.1)';
+        
+        document.getElementById('slotResult').innerHTML = '<div>Girando...</div>';
+        
+        setTimeout(() => {
+            slot1.style.transform = 'scale(1)';
+            slot2.style.transform = 'scale(1)';
+            slot3.style.transform = 'scale(1)';
+            
+            const result1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const result2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const result3 = symbols[Math.floor(Math.random() * symbols.length)];
+            
+            slot1.textContent = result1;
+            slot2.textContent = result2;
+            slot3.textContent = result3;
+            
+            // Verificar ganancia
+            if (result1 === result2 && result2 === result3) {
+                const winAmount = slotBet * 10;
+                window.parent.postMessage({ type: 'addBalance', amount: winAmount }, '*');
+                document.getElementById('slotResult').innerHTML = 
+                    `<div style="color: var(--win-color);">¡JACKPOT! Ganaste ${winAmount} PIX (x10)</div>`;
+            } else if (result1 === result2 || result2 === result3 || result1 === result3) {
+                const winAmount = slotBet * 2;
+                window.parent.postMessage({ type: 'addBalance', amount: winAmount }, '*');
+                document.getElementById('slotResult').innerHTML = 
+                    `<div style="color: var(--win-color);">¡2 iguales! Ganaste ${winAmount} PIX (x2)</div>`;
+            } else {
+                document.getElementById('slotResult').innerHTML = 
+                    `<div style="color: var(--loss-color);">Sin coincidencias. Perdiste ${slotBet} PIX.</div>`;
+            }
+        }, 1000);
+    });
+</script>
