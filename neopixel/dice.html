@@ -1,0 +1,171 @@
+<h2 class="game-title"><i class="fas fa-dice-d6"></i> Dados</h2>
+<div class="dice-container">
+    <div class="dice-display">
+        <div class="dice" id="dice1"></div>
+        <div class="dice" id="dice2"></div>
+    </div>
+    
+    <div style="display: flex; justify-content: center; gap: 20px; margin: 30px 0; flex-wrap: wrap;">
+        <div style="text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.8;">APUESTA</div>
+            <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+                <button class="cyber-button" id="diceDecrease" style="width: 50px; height: 50px; border-radius: 50%; padding: 0;">-50</button>
+                <div style="font-size: 2rem; font-weight: 700; color: var(--secondary-color); min-width: 100px;" id="diceBet">500</div>
+                <button class="cyber-button" id="diceIncrease" style="width: 50px; height: 50px; border-radius: 50%; padding: 0;">+50</button>
+            </div>
+        </div>
+        
+        <div style="text-align: center;">
+            <div style="font-size: 0.9rem; opacity: 0.8;">SELECCIONA TU APUESTA</div>
+            <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="cyber-button" data-bet="high">Alto (2x)</button>
+                <button class="cyber-button" data-bet="low">Bajo (2x)</button>
+                <button class="cyber-button" data-bet="double">Dobles (6x)</button>
+                <button class="cyber-button" data-bet="seven">7 (3x)</button>
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center;">
+        <button class="cyber-button green" id="diceRoll" style="padding: 15px 50px; font-size: 1.2rem;">Lanzar Dados</button>
+    </div>
+    
+    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 20px; margin-top: 30px; text-align: center;" id="diceResult">
+        Selecciona tu apuesta y presiona "Lanzar Dados"
+    </div>
+</div>
+
+<script>
+    // Juego de dados
+    let diceBet = 500;
+    let selectedBet = null;
+    
+    const dice1 = document.getElementById('dice1');
+    const dice2 = document.getElementById('dice2');
+    const betDisplay = document.getElementById('diceBet');
+    
+    // Inicializar dados
+    function initDice() {
+        createDiceFace(dice1, 1);
+        createDiceFace(dice2, 1);
+    }
+    
+    initDice();
+    
+    // Actualizar apuesta
+    function updateBet(amount) {
+        diceBet += amount;
+        if (diceBet < 10) diceBet = 10;
+        if (diceBet > 5000) diceBet = 5000;
+        betDisplay.textContent = diceBet;
+    }
+    
+    // Botones de apuesta
+    document.getElementById('diceIncrease').addEventListener('click', () => updateBet(50));
+    document.getElementById('diceDecrease').addEventListener('click', () => updateBet(-50));
+    
+    // Seleccionar tipo de apuesta
+    document.querySelectorAll('[data-bet]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-bet]').forEach(b => {
+                b.style.opacity = '0.7';
+            });
+            
+            this.style.opacity = '1';
+            selectedBet = this.dataset.bet;
+        });
+    });
+    
+    // Lanzar dados
+    document.getElementById('diceRoll').addEventListener('click', rollDice);
+    
+    function createDiceFace(diceElement, value) {
+        diceElement.innerHTML = '';
+        const dotPositions = {
+            1: [[1, 1]],
+            2: [[0, 0], [2, 2]],
+            3: [[0, 0], [1, 1], [2, 2]],
+            4: [[0, 0], [0, 2], [2, 0], [2, 2]],
+            5: [[0, 0], [0, 2], [1, 1], [2, 0], [2, 2]],
+            6: [[0, 0], [0, 1], [0, 2], [2, 0], [2, 1], [2, 2]]
+        };
+        
+        const positions = dotPositions[value];
+        positions.forEach(pos => {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.gridColumn = pos[0] + 1;
+            dot.style.gridRow = pos[1] + 1;
+            diceElement.appendChild(dot);
+        });
+    }
+    
+    function rollDice() {
+        if (!selectedBet) {
+            alert("Selecciona un tipo de apuesta primero");
+            return;
+        }
+        
+        window.parent.postMessage({ type: 'deductBalance', amount: diceBet }, '*');
+        
+        // Animación
+        dice1.classList.add('rolling');
+        dice2.classList.add('rolling');
+        
+        document.getElementById('diceResult').innerHTML = '<div>¡Lanzando dados!</div>';
+        
+        // Resultados
+        setTimeout(() => {
+            dice1.classList.remove('rolling');
+            dice2.classList.remove('rolling');
+            
+            const dice1Value = Math.floor(Math.random() * 6) + 1;
+            const dice2Value = Math.floor(Math.random() * 6) + 1;
+            const total = dice1Value + dice2Value;
+            
+            createDiceFace(dice1, dice1Value);
+            createDiceFace(dice2, dice2Value);
+            
+            checkDiceResult(dice1Value, dice2Value, total);
+        }, 1000);
+    }
+    
+    function checkDiceResult(dice1, dice2, total) {
+        let win = false;
+        let multiplier = 1;
+        let message = '';
+        
+        switch(selectedBet) {
+            case 'high':
+                win = total >= 7;
+                multiplier = 2;
+                message = `Alto (7-12)`;
+                break;
+            case 'low':
+                win = total <= 6;
+                multiplier = 2;
+                message = `Bajo (2-6)`;
+                break;
+            case 'double':
+                win = dice1 === dice2;
+                multiplier = 6;
+                message = `Dobles`;
+                break;
+            case 'seven':
+                win = total === 7;
+                multiplier = 3;
+                message = `Siete`;
+                break;
+        }
+        
+        if (win) {
+            const winAmount = diceBet * multiplier;
+            window.parent.postMessage({ type: 'addBalance', amount: winAmount }, '*');
+            document.getElementById('diceResult').innerHTML = 
+                `<div style="color: var(--win-color);">¡${message}! ${dice1} + ${dice2} = ${total}. Ganaste ${winAmount} PIX (x${multiplier})</div>`;
+        } else {
+            document.getElementById('diceResult').innerHTML = 
+                `<div style="color: var(--loss-color);">${dice1} + ${dice2} = ${total}. Perdiste ${diceBet} PIX.</div>`;
+        }
+    }
+</script>
